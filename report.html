@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Balaji Foods</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #fff8f0;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #ff0157;
+            color: #fff;
+            padding: 20px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .actions input, .actions button {
+            padding: 8px 14px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 2px solid #ff0157;
+            background: #fff;
+            color: #ff0157;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .actions button:hover {
+            background: #ff0157;
+            color: white;
+        }
+        .container {
+            padding: 30px;
+            max-width: 90%;
+            margin: auto;
+        }
+        .report-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        hr {
+            margin: 20px 0;
+            border-top: 1px dashed #aaa;
+        }
+        /* New styles for Cancel Order functionality */
+        .order-checkbox {
+            margin-right: 5px;
+        }
+        .delete-selected-btn {
+            margin-top: 10px;
+            padding: 8px 14px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 2px solid #ff0157;
+            background: #ff0157;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .delete-selected-btn:hover {
+            background: #e50049;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Style for the Order Now button */
+        #order-now-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #order-now-btn:hover {
+            background: #218838;
+        }
+
+        /* Custom styles for the date range picker */
+        .date-range-picker {
+            display: none;
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            width: 300px;
+        }
+        .date-range-picker label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .date-range-picker input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .date-range-picker .btn-container {
+            text-align: right;
+            margin-top: 10px;
+        }
+        .date-range-picker button {
+            padding: 10px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+            color: #fff;
+        }
+        .date-range-picker button.confirm {
+            background-color: #28a745;
+        }
+        .date-range-picker button.confirm:hover {
+            background-color: #218838;
+        }
+        .date-range-picker button.cancel {
+            background-color: #dc3545;
+            margin-right: 10px;
+        }
+        .date-range-picker button.cancel:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <span>📋 Sales Report - Balaji Foods</span>
+        <div class="actions">
+            <input type="date" id="report-date" />
+            <button onclick="viewReport()">📊 View Daily</button>
+            <button onclick="exportPDF('daily')">🧾 Daily PDF</button>
+            <button id="custom-pdf-btn">Custom PDF</button>
+            <button id="cancel-order-btn" onclick="toggleOrderCancellation()">❌ Cancel Order</button> </div>
+        <a href="order.html" id="order-now-btn">Order Now</a>
+    </header>
+    <div class="container">
+        <div class="report-box" id="report"></div>
+        <button id="delete-selected-btn" class="delete-selected-btn hidden" onclick="deleteSelectedOrders()">Delete Selected Orders</button>
+        <div class="date-range-picker" id="date-range-picker">
+            <label for="from-date">From Date:</label>
+            <input type="date" id="from-date" name="from-date">
+            <label for="to-date">To Date:</label>
+            <input type="date" id="to-date" name="to-date">
+            <div class="btn-container">
+                <button class="cancel">Cancel</button>
+                <button class="confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const reportBox = document.getElementById('report');
+        const cancelOrderBtn = document.getElementById('cancel-order-btn');
+        const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+        const orderNowBtn = document.getElementById('order-now-btn');
+        const customPdfBtn = document.getElementById('custom-pdf-btn');
+        const dateRangePicker = document.getElementById('date-range-picker');
+        const cancelDateRangeBtn = dateRangePicker.querySelector('.cancel');
+        const confirmDateRangeBtn = dateRangePicker.querySelector('.confirm');
+        const fromDateInput = document.getElementById('from-date');
+        const toDateInput = document.getElementById('to-date');
+
+
+        let isCancellationMode = false;
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-IN', options);
+        }
+
+        function formatDateTimeForExcel(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const formattedDate = date.getFullYear() + '-' +
+                ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                ('0' + date.getDate()).slice(-2);
+            const formattedTime = ('0' + date.getHours()).slice(-2) + ':' +
+                ('0' + date.getMinutes()).slice(-2) + ':' +
+                ('0' + date.getSeconds()).slice(-2);
+
+            return formattedDate + ' ' + formattedTime;
+        }
+
+        function viewReport() {
+            const date = document.getElementById('report-date').value || new Date().toISOString().split('T')[0];
+            const history = JSON.parse(localStorage.getItem('orderHistory') || '{}');
+            const orders = history[date] || [];
+
+            let totalRevenue = 0;
+            const itemQuantities = {};
+
+            let html = `<h3>📅 Date: ${date}</h3>`;
+            if (orders.length > 0) {
+                html += `
+                    <table>
+                        <thead>
+                            <tr>
+                                ${isCancellationMode ? '<th>Select</th>' : ''}
+                                <th>Date</th>
+                                <th>Bill No.</th>
+                                <th>Time</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Amount</th>
+                                <th>Payment Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                orders.forEach((order, index) => {
+                    totalRevenue += order.total || 0;
+                    order.orderItems.forEach(item => {
+                        itemQuantities[item.name] = (itemQuantities[item.name] || 0) + item.qty;
+                        html += `
+                            <tr>
+                                ${isCancellationMode
+                                    ? `<td><input type="checkbox" class="order-checkbox" id="order-${date}-${index}"></td>`
+                                    : ''
+                                }
+                                <td>${date}</td>
+                                <td>${order.billNumber || 'N/A'}</td>
+                                <td>${order.timestamp || 'N/A'}</td>
+                                <td>${item.name}</td>
+                                <td>${item.qty}</td>
+                                <td>${item.price || 'N/A'}</td>
+                                <td>${item.amount || 'N/A'}</td>
+                                <td>${order.paymentMode || 'N/A'}</td>
+                            </tr>
+                        `;
+                    });
+                });
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="${isCancellationMode ? '9' : '8'}" style="text-align: right; font-weight: bold;">Total Revenue:</td>
+                                    <td>₹${totalRevenue.toFixed(2)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <hr>
+                        <h4>Total Items Sold:</h4>
+                        <ul>
+                `;
+                for (const [name, qty] of Object.entries(itemQuantities)) {
+                    html += `<li>${name}: ${qty}</li>`;
+                }
+                html += '</ul>';
+            } else {
+                html += '<p>No sales data for this date.</p>';
+            }
+            reportBox.innerHTML = html;
+            deleteSelectedBtn.classList.toggle('hidden', !isCancellationMode);
+        }
+
+
+
+        function exportPDF(type, fromDate = null, toDate = null) {
+            const history = JSON.parse(localStorage.getItem('orderHistory') || '{}');
+            const date = document.getElementById('report-date').value || new Date().toISOString().split('T')[0];
+            let html = '';
+            let reportTitle = '';
+
+            if (type === 'daily') {
+                const orders = history[date] || [];
+                reportTitle = `Daily Sales Report - ${date}`;
+                html = `<h3>${reportTitle}</h3><table><thead><tr><th>Date</th><th>Bill No.</th><th>Time</th><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th><th>Payment Mode</th></tr></thead><tbody>`;
+                orders.forEach(order => {
+                    order.orderItems.forEach(item => {
+                        html += `<tr><td>${date}</td><td>${order.billNumber || 'N/A'}</td><td>${order.timestamp || 'N/A'}</td><td>${item.name}</td><td>${item.qty}</td><td>${item.price || 'N/A'}</td><td>${order.amount || 'N/A'}</td><td>${order.paymentMode || 'N/A'}</td></tr>`;
+                    });
+                });
+                html += `</tbody></table>`;
+            } else if (type === 'custom' && fromDate && toDate) {
+                const startDate = new Date(fromDate);
+                const endDate = new Date(toDate);
+                reportTitle = `Custom Sales Report - From ${formatDate(fromDate)} To ${formatDate(toDate)}`;
+                html = `<h3>${reportTitle}</h3><table><thead><tr><th>Date</th><th>Bill No.</th><th>Time</th><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th><th>Payment Mode</th></tr></thead><tbody>`;
+                for (const d in history) {
+                    const orderDate = new Date(d);
+                    if (orderDate >= startDate && orderDate <= endDate) {
+                        history[d].forEach(order => {
+                            order.orderItems.forEach(item => {
+                                html += `<tr><td>${d}</td><td>${order.billNumber || 'N/A'}</td><td>${order.timestamp || 'N/A'}</td><td>${item.name}</td><td>${item.qty}</td><td>${item.price || 'N/A'}</td><td>${order.amount || 'N/A'}</td><td>${order.paymentMode || 'N/A'}</td></tr>`;
+                            });
+                        });
+                    }
+                }
+                html += `</tbody></table>`;
+            } else {
+                html += `<h3>Full Sales Report</h3>`;
+                reportTitle = 'Full Sales Report';
+                for (const d in history) {
+                    html += `<strong>${d}</strong><table><thead><tr><th>Date</th><th>Bill No.</th><th>Time</th><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th><th>Payment Mode</th></tr></thead><tbody>`;
+                    history[d].forEach(order => {
+                        order.orderItems.forEach(item => {
+                            html += `<tr><td>${d}</td><td>${order.billNumber || 'N/A'}</td><td>${order.timestamp || 'N/A'}</td><td>${item.name}</td><td>${item.qty}</td><td>${item.price || 'N/A'}</td><td>${order.amount || 'N/A'}</td><td>${order.paymentMode || 'N/A'}</td></tr>`;
+                        });
+                    });
+                    html += `</tbody></table><hr>`;
+                }
+            }
+            const win = window.open('', '', 'width=800,height=700');
+            win.document.write(`<html><head><title>${reportTitle}</title><style>body { font-family: Poppins; padding: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; font-weight: bold; }</style></head><body>${html}</body></html>`);
+            win.document.close();
+            win.print();
+        }
+
+        function toggleOrderCancellation() {
+            isCancellationMode = !isCancellationMode;
+            cancelOrderBtn.textContent = isCancellationMode ? '✔ Done' : '❌ Cancel Order';
+            deleteSelectedBtn.classList.toggle('hidden', !isCancellationMode);
+            viewReport();
+        }
+
+        function deleteSelectedOrders() {
+            const date = document.getElementById('report-date').value || new Date().toISOString().split('T')[0];
+            const history = JSON.parse(localStorage.getItem('orderHistory') || '{}');
+            let orders = history[date] || [];
+
+            const selectedOrderIndices = [];
+            document.querySelectorAll('.order-checkbox').forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    selectedOrderIndices.push(index);
+                }
+            });
+
+            selectedOrderIndices.reverse().forEach(index => {
+                orders.splice(index, 1);
+            });
+
+            history[date] = orders;
+            localStorage.setItem('orderHistory', JSON.stringify(history));
+
+            isCancellationMode = false;
+            cancelOrderBtn.textContent = '❌ Cancel Order';
+            deleteSelectedBtn.classList.add('hidden');
+            viewReport();
+            alert('Selected orders have been cancelled.');
+        }
+
+        // Event Listeners for Custom Date Range Picker
+        customPdfBtn.addEventListener('click', () => {
+            dateRangePicker.style.display = 'block';
+        });
+
+        cancelDateRangeBtn.addEventListener('click', () => {
+            dateRangePicker.style.display = 'none';
+        });
+
+        confirmDateRangeBtn.addEventListener('click', () => {
+            const fromDate = fromDateInput.value;
+            const toDate = toDateInput.value;
+            if (fromDate && toDate) {
+                exportPDF('custom', fromDate, toDate);
+                dateRangePicker.style.display = 'none';
+                fromDateInput.value = '';
+                toDateInput.value = '';
+            } else {
+                alert('Please select both From Date and To Date.');
+            }
+        });
+
+    </script>
+</body>
+</html>

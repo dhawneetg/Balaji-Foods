@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - Balaji Foods</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        /* Printing styles */
+        @media print {
+            @page {
+                margin: 0mm 0mm 0mm 0mm; /* All margins set to 0 */
+                size: auto;  /* attempt to set to auto */
+            }
+            body {
+                padding: 0mm;
+                margin: 0mm;
+            }
+            .receipt-container {
+                width: auto;
+                margin: 0mm;
+                padding: 0mm;
+            }
+             p, h2, h3, table, canvas {
+                margin-bottom: 0.5mm;
+                margin-top: 0.5mm;
+            }
+        }
+
+        body {
+            font-family: monospace;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            text-transform: uppercase;
+        }
+
+        hr {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+
+        canvas {
+            margin: 10px auto;
+            display: block;
+        }
+
+        .bill-info {
+            margin-bottom: 10px;
+        }
+
+        .bill-info p {
+            margin: 5px 0;
+        }
+        #payment-message {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+        .receipt-container {
+            width: 100%;
+            max-width: 80%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <p>FSSAI No: 22225050000122</p>
+        <h2>BALAJI FOODS</h2>
+        <hr>
+        <div class="bill-info">
+            <p>Order No: <span id="bill-number"></span></p>
+            <p>Date: <span id="bill-date"></span></p>
+            <p>Time: <span id="bill-time"></span></p>
+        </div>
+        <hr>
+        <div id="items"></div>
+        <hr>
+        <p><strong>Grand Total: ₹<span id="grand-total">0</span></strong></p>
+        <hr>
+        <canvas id="qrcode"></canvas>
+        <p id="payment-message"></p>
+        <p>Thank You</p>
+    </div>
+
+    <script>
+        const itemsContainer = document.getElementById('items');
+        const grandTotalSpan = document.getElementById('grand-total');
+        const billNumberSpan = document.getElementById('bill-number');
+        const billDateSpan = document.getElementById('bill-date');
+        const billTimeSpan = document.getElementById('bill-time');
+        let total = 0;
+        const qrCodeElement = document.getElementById('qrcode');
+        const paymentMessageElement = document.getElementById('payment-message');
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true };
+            const formattedDate = now.toLocaleDateString('en-IN', dateOptions);
+            const formattedTime = now.toLocaleTimeString('en-IN', timeOptions);
+            return { date: formattedDate, time: formattedTime };
+        }
+
+        const { date, time } = getCurrentDateTime();
+        billDateSpan.textContent = date;
+        billTimeSpan.textContent = time;
+
+        const today = new Date().toISOString().split('T')[0];
+        const history = JSON.parse(localStorage.getItem('orderHistory') || '{}');
+        const order = history[today] ? history[today][history[today].length - 1] : null;
+
+        if (order) {
+            billNumberSpan.textContent = order.billNumber;
+            if (order.orderItems) {
+                order.orderItems.forEach(item => {
+                    const line = document.createElement('p');
+                    const amount = item.qty * item.price;
+                    total += amount;
+                    line.textContent = `${item.name} × ${item.qty} = ₹${amount}`;
+                    itemsContainer.appendChild(line);
+                });
+            }
+            grandTotalSpan.textContent = total;
+
+            if (order.paymentMode === 'online') {
+                new QRious({
+                    element: qrCodeElement,
+                    size: 150,
+                    value: `upi://pay?pa=8949951239@okbizaxis&pn=Balaji%20Foods&am=${total}&cu=INR`
+                });
+                paymentMessageElement.textContent = "Scan QR Code to Pay Online";
+            } else if (order.paymentMode === 'cash') {
+                qrCodeElement.style.display = 'none';
+                paymentMessageElement.textContent = "Payment Done in Cash";
+            }
+        }
+
+        window.onload = () => window.print();
+    </script>
+</body>
+</html>
