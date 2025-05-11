@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Balaji Foods</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -24,7 +24,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 40px 100px;
+            padding: 20px;
             z-index: 10000;
             display: flex;
             justify-content: space-between;
@@ -34,14 +34,14 @@
 
         header.sticky {
             background: #fff;
-            padding: 10px 100px;
+            padding: 10px 20px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
         header .logo {
             color: #fff;
             font-weight: 700;
-            font-size: 2em;
+            font-size: 1.5em;
             text-decoration: none;
         }
 
@@ -53,32 +53,62 @@
             color: #ff0157;
         }
 
-        header .navigation {
-            position: relative;
-            display: flex;
-        }
-
-        header .navigation li {
-            list-style: none;
-            margin-left: 30px;
-        }
-
-        header .navigation li a {
-            text-decoration: none;
+        .menu-toggle {
+            display: block; /* Show on mobile */
+            font-size: 30px;
+            cursor: pointer;
             color: #fff;
-            font-weight: 300;
+            z-index: 10002;
+            transition: transform 0.3s ease-in-out;
         }
 
-        header .navigation li a:hover {
-            color: orange;
+        .menu-toggle.active {
+            transform: rotate(90deg);
         }
 
-        header.sticky .navigation li a {
+        header.sticky .menu-toggle {
             color: #111;
         }
 
-        header.sticky .navigation li a:hover {
-            color: #ff0157;
+        .mobile-nav {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #fff;
+            flex-direction: column;
+            width: 180px;
+            padding: 20px;
+            display: none;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .mobile-nav.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mobile-nav li {
+            list-style: none;
+            margin: 10px 0;
+        }
+
+        .mobile-nav li a {
+            text-decoration: none;
+            color: #111;
+            font-weight: 300;
+        }
+
+        .mobile-nav li a:hover {
+            color: #000;
+        }
+
+        .desktop-nav {
+            display: none; /* Initially hidden on mobile */
         }
 
         .hero {
@@ -87,7 +117,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: url(asste/main.jpg) no-repeat center center/cover;
+            background: url("asste/main.jpg") no-repeat center center/cover;
             position: relative;
             text-align: center;
             color: #fff;
@@ -98,6 +128,8 @@
             font-size: 50px;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 5px 5px 8px rgba(0,0,0,0.5);
         }
 
         .hero p {
@@ -122,7 +154,6 @@
             color: #111;
         }
 
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -135,6 +166,7 @@
             justify-content: center;
             align-items: center;
         }
+
         .modal-content {
             background-color: #fff;
             padding: 20px;
@@ -143,10 +175,12 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
             position: relative;
         }
+
         .modal-content h2 {
             margin-bottom: 15px;
             font-size: 20px;
         }
+
         .modal-content input {
             width: 100%;
             padding: 10px;
@@ -154,6 +188,7 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
+
         .modal-content button {
             width: 100%;
             padding: 10px;
@@ -163,6 +198,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .close-btn {
             position: absolute;
             top: 10px;
@@ -172,94 +208,177 @@
             color: #999;
             cursor: pointer;
         }
+
         .close-btn:hover {
-            color: #ff0157;
+            color: #000;
+        }
+
+        /* Desktop Styles */
+        @media (min-width: 769px) {
+            header {
+                padding: 40px 100px;
+                display: flex;
+            }
+
+            header.sticky {
+                padding: 10px 100px;
+            }
+
+            header .logo {
+                font-size: 2em;
+            }
+
+            .menu-toggle {
+                display: none; /* Hide on desktop */
+            }
+
+            .mobile-nav {
+                display: none !important; /* Hide mobile nav on desktop */
+            }
+
+            .desktop-nav {
+                display: flex !important; /* Show desktop nav on desktop */
+            }
+
+            .desktop-nav li {
+                list-style: none;
+                margin-left: 30px;
+            }
+
+            .desktop-nav li a {
+                color: #fff;
+            }
+
+            header.sticky .desktop-nav li a {
+                color: #000000;
+                font-weight: none;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="sticky">
-        <a href="#" class="logo">
-            "Balaji Foods"
-            <span>.</span>
-        </a>
-        <ul class="navigation" id="nav-links">
+
+<header class="sticky">
+    <a href="#" class="logo">"Balaji Foods"<span> .</span></a>
+    <nav>
+        <div class="menu-toggle" id="menu-toggle">&#9776;</div>
+        <ul class="mobile-nav" id="mobile-nav-links">
+            </ul>
+        <ul class="desktop-nav" id="desktop-nav-links">
             <li><a href="#banner">Home</a></li>
-            <li><a href="#" onclick="showLogin()">Login</a></li>
+            <li><a href="#" id="desktop-auth-link" onclick="showLogin()">Login</a></li>
         </ul>
-    </header>
+    </nav>
+</header>
 
-    <section class="hero">
-        <h1>Welcome to Balaji Foods</h1>
-        <p>Enjoy the taste of authentic chaat — Pani Puri, Bhel Puri, Dahi Puri and more, freshly made just for you.</p>
-          <a href="#" id="hero-btn" onclick="showLogin()">Login</a>
-
+<section class="hero" id="banner">
+    <h1>Welcome to Balaji Foods</h1>
+    <p>Enjoy the taste of authentic chaat — Pani Puri, Bhel Puri, Dahi Puri and more, freshly made just for you.</p>
     </section>
 
-    <div class="modal" id="login-modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeLogin()">&times;</span>
-            <h2>Login</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="verifyLogin()">Login</button>
-        </div>
+<div class="modal" id="login-modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeLogin()">&times;</span>
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="verifyLogin()">Login</button>
     </div>
+</div>
 
-    <script>
-        function showLogin() {
-            document.getElementById('login-modal').style.display = 'flex';
+<script>
+    const toggleBtn = document.getElementById("menu-toggle");
+    const mobileNavLinks = document.getElementById("mobile-nav-links");
+    const desktopNavLinks = document.getElementById("desktop-nav-links");
+    let isLoggedIn = false;
+
+    toggleBtn.addEventListener("click", () => {
+        mobileNavLinks.classList.toggle("active");
+        toggleBtn.classList.toggle("active");
+        toggleBtn.innerHTML = mobileNavLinks.classList.contains("active") ? "&times;" : "&#9776;";
+    });
+
+    function updateMobileNav() {
+        if (isLoggedIn) {
+            mobileNavLinks.innerHTML = `
+                <li><a href="#banner">Home</a></li>
+                <li><a href="order.html">Order</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="#" onclick="signOut()" id="mobile-auth-link">Sign Out</a></li>
+            `;
+        } else {
+            mobileNavLinks.innerHTML = `
+                <li><a href="#banner">Home</a></li>
+                <li><a href="#" id="mobile-auth-link" onclick="showLogin()">Login</a></li>
+            `;
         }
-
-        function closeLogin() {
-            document.getElementById('login-modal').style.display = 'none';
-        }
-
-       function verifyLogin() {
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
-    if (user === 'BFSIROHI' && pass === 'Pgehlot@123') {
-        closeLogin();
-        const nav = document.getElementById('nav-links');
-        nav.innerHTML = `
-            <li><a href="#banner">Home</a></li>
-            <li><a href="order.html">Order</a></li>
-            <li><a href="report.html">Report</a></li>
-        `;
-        
-        const heroBtn = document.getElementById('hero-btn');
-        heroBtn.textContent = 'Sign Out';
-        heroBtn.setAttribute('onclick', 'signOut()');
-    } else {
-        alert("Invalid credentials. Try again.");
+        toggleBtn.innerHTML = mobileNavLinks.classList.contains("active") ? "&times;" : "&#9776;";
     }
-}
- function signOut() {
-    const nav = document.getElementById('nav-links');
-    nav.innerHTML = `
-        <li><a href="#banner">Home</a></li>
-        <li><a href="#" onclick="showLogin()">Login</a></li>
-    `;
-    
-    const heroBtn = document.getElementById('hero-btn');
-    heroBtn.textContent = 'Login';
-    heroBtn.setAttribute('onclick', 'showLogin()');
-}
 
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('login-modal');
-            if (event.target === modal) {
-                closeLogin();
-            }
+    function updateDesktopNav() {
+        if (isLoggedIn) {
+            desktopNavLinks.innerHTML = `
+                <li><a href="#banner">Home</a></li>
+                <li><a href="order.html">Order</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="#" onclick="signOut()" id="desktop-auth-link">Sign Out</a></li>
+            `;
+        } else {
+            desktopNavLinks.innerHTML = `
+                <li><a href="#banner">Home</a></li>
+                <li><a href="#" id="desktop-auth-link" onclick="showLogin()">Login</a></li>
+            `;
         }
+    }
 
-        document.addEventListener('keydown', function (e) {
-            const modal = document.getElementById('login-modal');
-            if (modal.style.display === 'flex' && e.key === 'Enter') {
-                verifyLogin();
-            }
-        });
-    </script>
+    function showLogin() {
+        document.getElementById('login-modal').style.display = 'flex';
+    }
+
+    function closeLogin() {
+        document.getElementById('login-modal').style.display = 'none';
+    }
+
+    function verifyLogin() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        if (user === 'BFSIROHI' && pass === 'Pgehlot@123') {
+            closeLogin();
+            isLoggedIn = true;
+            updateMobileNav();
+            updateDesktopNav();
+        } else {
+            alert("Invalid credentials. Try again.");
+        }
+    }
+
+    function signOut() {
+        isLoggedIn = false;
+        updateMobileNav();
+        updateDesktopNav();
+        mobileNavLinks.classList.remove("active");
+        toggleBtn.classList.remove("active");
+        toggleBtn.innerHTML = "&#9776;";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('login-modal');
+        if (event.target === modal) {
+            closeLogin();
+        }
+    }
+
+    document.addEventListener('keydown', function (e) {
+        const modal = document.getElementById('login-modal');
+        if (modal.style.display === 'flex' && e.key === 'Enter') {
+            verifyLogin();
+        }
+    });
+
+    // Initial setup
+    updateMobileNav();
+    updateDesktopNav();
+</script>
+
 </body>
 </html>
